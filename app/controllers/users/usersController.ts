@@ -1,28 +1,54 @@
 import { Router } from 'express';
 import { UserModel, UserRole, User, ReservedUsernames } from '../../models/user';
+import { ApiResponse } from '../apiController';
 
 export const usersController: Router = Router();
 
+/**
+ * Method: GET
+ * Retrieves a list of users
+ */
 usersController.get('/', (req, res) => {
-    UserModel.find({}, 'username name role', (err, users) => {
-        if (err) {
-            console.log('Error retrieving users!');
-        }
+    let resData: ApiResponse;
 
-        res.send({
-            success: !err,
-            users: users,
+    UserModel.find()
+        .select('username name role')
+        .sort({ _id: 1 })
+        .exec((err, users) => {
+            if (err) {
+                resData = {
+                    success: false,
+                    message: `Error retrieving users: ${err.errmsg}`,
+                    error: err,
+                };
+
+                console.log(resData.message);
+            } else {
+                resData = {
+                    success: true,
+                    message: `Retrieved users successfully`,
+                    users: users,
+                };
+            }
+
+            res.send(resData);
         });
-    }).sort({ _id: 1 });
 });
 
+/**
+ * Method: POST
+ * Creates a new user
+ */
 usersController.post('/', (req, res) => {
+    let resData: ApiResponse;
+
     if (ReservedUsernames.indexOf(req.body.username) != -1) {
-        res.send({
+        resData = {
             success: false,
             message: `Username '${req.body.username}' is reserved. Use a different username.`,
-        });
+        };
 
+        res.send(resData);
         return;
     }
 
@@ -34,17 +60,20 @@ usersController.post('/', (req, res) => {
 
     newUserModel.save(err => {
         if (err) {
-            console.log('Error creating the user!');
-
-            res.send({
+            resData = {
                 success: false,
-                message: 'Cannot create the user',
-            });
+                message: `Error creating the user: ${err.errmsg}`,
+                error: err,
+            };
+
+            console.log(resData.message);
         } else {
-            res.send({
+            resData = {
                 success: true,
                 message: 'User created successfully',
-            });
+            };
         }
+
+        res.send(resData);
     });
 });
