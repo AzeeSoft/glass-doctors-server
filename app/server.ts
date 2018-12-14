@@ -52,6 +52,35 @@ class Server {
         this.db = mongoose.connection;
         this.db.once('open', callback => {
             console.log('Connected to the database successfully!');
+
+            this.addAdminUserIfMissing();
+        });
+    }
+
+    private addAdminUserIfMissing() {
+        UserModel.findOne({ role: UserRole.ADMIN }, (err, user) => {
+            if (err) {
+                console.log('Error retrieving admin user!');
+            } else {
+                if (!user) {
+                    console.log('Admin user is missing...');
+                    console.log('Creating Admin User...');
+
+                    const adminUserModel = new UserModel({
+                        username: 'admin',
+                        name: 'Admin',
+                        role: UserRole.ADMIN,
+                    } as User);
+
+                    adminUserModel.save(err => {
+                        if (err) {
+                            console.log('Error creating admin user!');
+                        } else {
+                            console.log('Admin user created successfully!');
+                        }
+                    });
+                }
+            }
         });
     }
 }

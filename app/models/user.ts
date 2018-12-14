@@ -6,6 +6,8 @@ export enum UserRole {
     USER = 'user',
 }
 
+export const ReservedUsernames = ['admin'];
+
 export class User extends Typegoose {
     @prop({ required: true, unique: true })
     username: string = '';
