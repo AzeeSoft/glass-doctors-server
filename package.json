@@ -1,0 +1,32 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Back end server built on express with typescript",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "tsc",
+    "tsc-watch": "tsc --watch",
+    "serve": "node build/server.js",
+    "serve-watch": "nodemon build/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Azee",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^4.16.0",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "mongoose": "^5.3.16",
+    "morgan": "^1.9.1",
+    "nodemon": "^1.18.8",
+    "reflect-metadata": "^0.1.12",
+    "typegoose": "^5.4.1",
+    "typescript": "^3.2.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.4",
+    "@types/mongoose": "^5.3.5",
+    "@types/morgan": "^1.7.35"
+  }
+}
