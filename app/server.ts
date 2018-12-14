@@ -1,10 +1,11 @@
-import express from 'express';
+import express, { Router } from 'express';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import serverConfig from './tools/serverConfig';
 import { UserModel, User, UserRole } from './models/user';
+import { apiController } from './controllers/apiController';
 
 class Server {
     readonly app: express.Application = express();
@@ -25,42 +26,7 @@ class Server {
         this.app.use(bodyParser.json());
         this.app.use(cors());
 
-        this.app.get('/users', (req, res) => {
-            UserModel.find({}, 'username name role', (err, users) => {
-                if (err) {
-                    console.log('Error retrieving users!');
-                }
-
-                res.send({
-                    success: !err,
-                    users: users,
-                });
-            }).sort({ _id: 1 });
-        });
-
-        this.app.post('/users', (req, res) => {
-            const newUserModel = new UserModel({
-                username: req.body.username,
-                name: req.body.name,
-                role: UserRole.USER,
-            } as User);
-
-            newUserModel.save(err => {
-                if (err) {
-                    console.log('Error creating the user!');
-
-                    res.send({
-                        success: false,
-                        message: 'Cannot create the user',
-                    });
-                } else {
-                    res.send({
-                        success: true,
-                        message: 'User created successfully',
-                    });
-                }
-            });
-        });
+        this.app.use('/', apiController);
 
         this.app.listen(serverConfig.http.port, () => {
             console.log(`Listening at http://localhost:${serverConfig.http.port}/`);
@@ -90,7 +56,5 @@ class Server {
     }
 }
 
-const server = new Server();
+export const server = new Server();
 server.init();
-
-export default server;
