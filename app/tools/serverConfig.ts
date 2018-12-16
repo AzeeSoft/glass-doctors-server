@@ -13,6 +13,7 @@ export default {
         port: +process.env.MONGO_PORT!,
         db: process.env.MONGO_DB,
 
+        defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD,
         passwordHash: {
             saltingRounds: 10,
         },

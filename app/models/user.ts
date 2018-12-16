@@ -54,7 +54,7 @@ export class User extends Typegoose {
 
                     const adminUserModel = new UserModel({
                         username: 'admin',
-                        password: 'admin_password',
+                        password: serverConfig.mongo.defaultAdminPassword,
                         name: 'Admin',
                         role: UserRole.ADMIN,
                     } as User);
