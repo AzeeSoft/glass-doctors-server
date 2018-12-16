@@ -1,5 +1,7 @@
-import mongoose from 'mongoose';
-import { Typegoose, prop, staticMethod, ModelType } from 'typegoose';
+import { Typegoose, prop, staticMethod, ModelType, pre } from 'typegoose';
+import bcrypt from 'bcrypt';
+import { MongooseDocument } from 'mongoose';
+import serverConfig from '../tools/serverConfig';
 
 export enum UserRole {
     ADMIN = 'admin',
@@ -8,15 +10,37 @@ export enum UserRole {
 
 export const ReservedUsernames = ['admin'];
 
+@pre("save", function(next) {
+    const user = this as MongooseDocument & User;
+
+    if (user.isModified('password')) {
+        // console.log("Hashing password...");
+
+        bcrypt.hash(user.password, serverConfig.mongo.passwordHash.saltingRounds, (err, hash) => {
+            if (err) {
+                console.log('Error hashing password!');
+                next(err);
+            } else {
+                user.password = hash;
+                next();
+            }
+        });
+    } else {
+        next();
+    }
+})
 export class User extends Typegoose {
     @prop({ required: true, unique: true })
-    username: string = '';
+    username?: string;
 
     @prop({ required: true })
-    name: string = '';
+    password?: string;
 
-    @prop({ required: true, enum: UserRole })
-    role: UserRole = UserRole.USER;
+    @prop({ required: true })
+    name?: string;
+
+    @prop({ required: true, enum: UserRole, default: UserRole.USER })
+    role?: UserRole;
 
     @staticMethod
     static addAdminIfMissing(this: ModelType<User> & User) {
@@ -30,6 +54,7 @@ export class User extends Typegoose {
 
                     const adminUserModel = new UserModel({
                         username: 'admin',
+                        password: 'admin_password',
                         name: 'Admin',
                         role: UserRole.ADMIN,
                     } as User);

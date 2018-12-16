@@ -1,15 +1,20 @@
-import { Router } from 'express';
+import { Router, RequestHandler, Request, Response } from 'express';
 import { UserModel, UserRole, User, ReservedUsernames } from '../../models/user';
-import { ApiResponse } from '../apiController';
+import { ApiResponseType } from '../apiController';
 
 export const usersController: Router = Router();
+
+usersController
+    .route('/')
+    .get(getAllUsers)
+    .post(addNewUser);
 
 /**
  * Method: GET
  * Retrieves a list of users
  */
-usersController.get('/', (req, res) => {
-    let resData: ApiResponse;
+function getAllUsers(req: Request, res: Response) {
+    let resData: ApiResponseType;
 
     UserModel.find()
         .select('username name role')
@@ -18,11 +23,11 @@ usersController.get('/', (req, res) => {
             if (err) {
                 resData = {
                     success: false,
-                    message: `Error retrieving users: ${err.errmsg}`,
-                    error: err,
+                    message: `Error retrieving users`,
+                    errorReport: err,
                 };
 
-                console.log(resData.message);
+                console.log(`${resData.message}: ${err.message}`);
             } else {
                 resData = {
                     success: true,
@@ -33,19 +38,21 @@ usersController.get('/', (req, res) => {
 
             res.send(resData);
         });
-});
+}
 
 /**
  * Method: POST
  * Creates a new user
  */
-usersController.post('/', (req, res) => {
-    let resData: ApiResponse;
+function addNewUser(req: Request, res: Response) {
+    let resData: ApiResponseType;
 
-    if (ReservedUsernames.indexOf(req.body.username) != -1) {
+    const { username, password, name } = req.body;
+
+    if (ReservedUsernames.indexOf(username) != -1) {
         resData = {
             success: false,
-            message: `Username '${req.body.username}' is reserved. Use a different username.`,
+            message: `Username '${username}' is reserved. Use a different username.`,
         };
 
         res.send(resData);
@@ -53,20 +60,20 @@ usersController.post('/', (req, res) => {
     }
 
     const newUserModel = new UserModel({
-        username: req.body.username,
-        name: req.body.name,
-        role: UserRole.USER,
+        username: username,
+        password: password,
+        name: name,
     } as User);
 
     newUserModel.save(err => {
         if (err) {
             resData = {
                 success: false,
-                message: `Error creating the user: ${err.errmsg}`,
-                error: err,
+                message: `Error creating the user!`,
+                errorReport: err,
             };
 
-            console.log(resData.message);
+            console.log(`${resData.message}: ${err.message}`);
         } else {
             resData = {
                 success: true,
@@ -76,4 +83,4 @@ usersController.post('/', (req, res) => {
 
         res.send(resData);
     });
-});
+}

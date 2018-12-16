@@ -1,10 +1,13 @@
-import express, { Router } from 'express';
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import serverConfig from './tools/serverConfig';
-import { UserModel, User, UserRole } from './models/user';
+import serverConfig, { ServerMode } from './tools/serverConfig';
+import { UserModel } from './models/user';
 import { apiController } from './controllers/apiController';
 
 class Server {
@@ -16,13 +19,20 @@ class Server {
 
     public init() {
         console.log('Initializing Server...');
+        if (serverConfig.mode === ServerMode.dev) {
+            console.log(`Server Config: ${JSON.stringify(serverConfig, null, 4)}`);
+        }
+        console.log();
 
         this.initExpressServer();
         this.initDatabaseConnection();
     }
 
     private initExpressServer() {
-        this.app.use(morgan('combined'));
+        if (serverConfig.mode === ServerMode.dev) {
+            this.app.use(morgan('combined'));
+        }
+
         this.app.use(bodyParser.json());
         this.app.use(cors());
 
@@ -52,7 +62,7 @@ class Server {
         );
 
         this.db = mongoose.connection;
-        this.db.once('open', callback => {
+        this.db.once('open', () => {
             console.log('Connected to the database successfully!');
 
             UserModel.addAdminIfMissing();
