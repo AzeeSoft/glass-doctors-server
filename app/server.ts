@@ -1,3 +1,7 @@
+// Registers module alisases (Needed for aliases to work in Node)
+import 'module-alias/register';
+
+// Imports and configures all the environment variables from .env file into the process.env object.
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -6,9 +10,9 @@ import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import serverConfig, { ServerMode } from './tools/serverConfig';
-import { UserModel } from './models/user';
-import { apiController } from './controllers/apiController';
+import serverConfig, { ServerMode } from '@/tools/serverConfig';
+import { UserModel } from '@/models/user';
+import { apiController } from '@/controllers/apiController';
 
 class Server {
     readonly app: express.Application = express();

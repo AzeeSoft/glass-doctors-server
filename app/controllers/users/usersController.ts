@@ -1,19 +1,20 @@
-import { Router, RequestHandler, Request, Response } from 'express';
-import { UserModel, UserRole, User, ReservedUsernames } from '../../models/user';
-import { ApiResponseType } from '../apiController';
+import { Router, Request, Response } from 'express';
+import { UserModel, User } from '@/models/user';
+import { ApiResponseType } from '@/controllers/apiController';
+import authMiddlewares from '@/middlewares/authMiddlewares';
 
 export const usersController: Router = Router();
 
 usersController
     .route('/')
-    .get(getAllUsers)
+    .get(authMiddlewares.allowOnlyAdmin, getAllUsers)
     .post(addNewUser);
 
 /**
  * Method: GET
  * Retrieves a list of users
  */
-function getAllUsers(req: Request, res: Response) {
+function getAllUsers(res: Response) {
     let resData: ApiResponseType;
 
     UserModel.find()
@@ -44,43 +45,14 @@ function getAllUsers(req: Request, res: Response) {
  * Method: POST
  * Creates a new user
  */
-function addNewUser(req: Request, res: Response) {
-    let resData: ApiResponseType;
-
+async function addNewUser(req: Request, res: Response) {
     const { username, password, name } = req.body;
 
-    if (ReservedUsernames.indexOf(username) != -1) {
-        resData = {
-            success: false,
-            message: `Username '${username}' is reserved. Use a different username.`,
-        };
-
-        res.send(resData);
-        return;
-    }
-
-    const newUserModel = new UserModel({
+    const resData: ApiResponseType = await UserModel.addNewUser({
         username: username,
         password: password,
         name: name,
     } as User);
 
-    newUserModel.save(err => {
-        if (err) {
-            resData = {
-                success: false,
-                message: `Error creating the user!`,
-                errorReport: err,
-            };
-
-            console.log(`${resData.message}: ${err.message}`);
-        } else {
-            resData = {
-                success: true,
-                message: 'User created successfully',
-            };
-        }
-
-        res.send(resData);
-    });
+    res.send(resData);
 }

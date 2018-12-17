@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 export enum ServerMode {
     dev = 'dev',
     prod = 'prod',
@@ -16,6 +17,15 @@ export default {
         defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD,
         passwordHash: {
             saltingRounds: 10,
+        },
+    },
+    auth: {
+        jwt: {
+            secret: process.env.JWT_SECRET,
+            options: {
+                expiresIn: '1d',
+                issuer: 'GlassDoctors',
+            } as jwt.SignOptions,
         },
     },
 };

@@ -1,7 +1,8 @@
-import { Typegoose, prop, staticMethod, ModelType, pre } from 'typegoose';
+import { Typegoose, prop, staticMethod, ModelType, pre, InstanceType } from 'typegoose';
 import bcrypt from 'bcrypt';
 import { MongooseDocument } from 'mongoose';
-import serverConfig from '../tools/serverConfig';
+import serverConfig from '@/tools/serverConfig';
+import { ApiResponseType } from '@/controllers/apiController';
 
 export enum UserRole {
     ADMIN = 'admin',
@@ -10,7 +11,7 @@ export enum UserRole {
 
 export const ReservedUsernames = ['admin'];
 
-@pre("save", function(next) {
+@pre('save', function(next) {
     const user = this as MongooseDocument & User;
 
     if (user.isModified('password')) {
@@ -31,16 +32,16 @@ export const ReservedUsernames = ['admin'];
 })
 export class User extends Typegoose {
     @prop({ required: true, unique: true })
-    username?: string;
+    username!: string;
 
     @prop({ required: true })
-    password?: string;
+    password!: string;
 
     @prop({ required: true })
-    name?: string;
+    name!: string;
 
     @prop({ required: true, enum: UserRole, default: UserRole.USER })
-    role?: UserRole;
+    role!: UserRole;
 
     @staticMethod
     static addAdminIfMissing(this: ModelType<User> & User) {
@@ -68,6 +69,46 @@ export class User extends Typegoose {
                     });
                 }
             }
+        });
+    }
+
+    @staticMethod
+    static addNewUser(this: ModelType<User> & User, userDoc: User) {
+        return new Promise<ApiResponseType>((resolve, reject) => {
+            let resData: ApiResponseType;
+
+            const newUserModel = new UserModel(userDoc);
+
+            if (ReservedUsernames.indexOf(userDoc.username) != -1) {
+                resData = {
+                    success: false,
+                    message: `Username '${
+                        userDoc.username
+                    }' is reserved. Use a different username.`,
+                };
+
+                resolve(resData);
+                return;
+            }
+
+            newUserModel.save(err => {
+                if (err) {
+                    resData = {
+                        success: false,
+                        message: `Error creating the user!`,
+                        errorReport: err,
+                    };
+
+                    console.log(`${resData.message}: ${err.message}`);
+                } else {
+                    resData = {
+                        success: true,
+                        message: 'User created successfully',
+                    };
+                }
+
+                resolve(resData);
+            });
         });
     }
 }
