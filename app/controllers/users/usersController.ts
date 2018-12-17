@@ -14,7 +14,7 @@ usersController
  * Method: GET
  * Retrieves a list of users
  */
-function getAllUsers(res: Response) {
+function getAllUsers(req: Request, res: Response) {
     let resData: ApiResponseType;
 
     UserModel.find()
