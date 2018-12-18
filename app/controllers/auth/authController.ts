@@ -5,12 +5,12 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import serverConfig from '@/tools/serverConfig';
 import { ApiTokenPayload } from '../../tools/types/auth/index';
-import session from 'express-session';
 
 export const authController = Router();
 
 authController.post('/login', login);
 authController.post('/signup', signup);
+authController.post('/validateAPIToken', validateApiToken);
 
 /**
  * Validates user credentials, and sends back a JWT (JSON Web Token).
@@ -117,6 +117,27 @@ async function signup(req: Request, res: Response) {
         password: password,
         name: name,
     } as User);
+
+    res.send(resData);
+}
+
+/**
+ * Validates the API Token in the current request.
+ */
+function validateApiToken(req: Request, res: Response) {
+    let resData: ApiResponseType;
+
+    if (req.apiTokenPayload) {
+        resData = {
+            success: true,
+            message: 'Your API Token is valid',
+        };
+    } else {
+        resData = {
+            success: false,
+            message: 'Your API Token is invalid',
+        };
+    }
 
     res.send(resData);
 }

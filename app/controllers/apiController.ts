@@ -34,18 +34,22 @@ function extractApiToken(req: Request, res: Response, next: NextFunction) {
         const authHeaderWords = authHeader.split(' ');
         if (authHeaderWords.length >= 2) {
             apiToken = authHeaderWords[1];
+
+            console.log('Found api token in auth header');
         }
     }
 
     // Try to extract apiToken from the session
     if (!apiToken) {
         console.log('\nCannot find api token in auth header! Checking session instead...');
+
         if (req.session && req.session.apiToken) {
             apiToken = req.session.apiToken;
             console.log('Found api token in session');
         } else {
             console.log('Cannot find api token in session!');
         }
+
         console.log();
     }
 
