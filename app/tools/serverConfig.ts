@@ -8,6 +8,9 @@ export default {
     mode: process.env.MODE as ServerMode,
     http: {
         port: +process.env.HTTP_PORT!,
+        cors: {
+            origin: process.env.CROSS_ORIGIN_DOMAINS!.split(' '),
+        },
     },
     mongo: {
         host: process.env.MONGO_HOST,

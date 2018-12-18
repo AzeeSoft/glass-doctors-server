@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ApiResponseType } from '../controllers/apiController';
+import { ApiResponseData } from '../controllers/apiController';
 import { UserRole } from '../models/user';
 
 const authMiddlewares = {
@@ -7,7 +7,7 @@ const authMiddlewares = {
         if (req.apiTokenPayload) {
             next();
         } else {
-            const resData: ApiResponseType = {
+            const resData: ApiResponseData = {
                 success: false,
                 message: 'Authorization error. Token Required.',
             };
@@ -19,7 +19,7 @@ const authMiddlewares = {
         if (req.apiTokenPayload && req.apiTokenPayload.userData.role === UserRole.ADMIN) {
             next();
         } else {
-            const resData: ApiResponseType = {
+            const resData: ApiResponseData = {
                 success: false,
                 message: 'Authorization error. Insufficient permissions.',
             };

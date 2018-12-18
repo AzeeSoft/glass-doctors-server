@@ -2,7 +2,7 @@ import { Typegoose, prop, staticMethod, ModelType, pre, InstanceType } from 'typ
 import bcrypt from 'bcrypt';
 import { MongooseDocument } from 'mongoose';
 import serverConfig from '@/tools/serverConfig';
-import { ApiResponseType } from '@/controllers/apiController';
+import { ApiResponseData } from '@/controllers/apiController';
 
 export enum UserRole {
     ADMIN = 'admin',
@@ -74,8 +74,8 @@ export class User extends Typegoose {
 
     @staticMethod
     static addNewUser(this: ModelType<User> & User, userDoc: User) {
-        return new Promise<ApiResponseType>((resolve, reject) => {
-            let resData: ApiResponseType;
+        return new Promise<ApiResponseData>((resolve, reject) => {
+            let resData: ApiResponseData;
 
             const newUserModel = new UserModel(userDoc);
 

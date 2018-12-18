@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { ApiResponseType } from '@/controllers/apiController';
+import { ApiResponseData } from '@/controllers/apiController';
 import { UserModel, User } from '@/models/user';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -16,7 +16,7 @@ authController.post('/validateAPIToken', validateApiToken);
  * Validates user credentials, and sends back a JWT (JSON Web Token).
  */
 function login(req: Request, res: Response) {
-    let resData: ApiResponseType;
+    let resData: ApiResponseData;
 
     const { username, password, storeApiTokenInSession } = req.body;
 
@@ -112,7 +112,7 @@ function login(req: Request, res: Response) {
 async function signup(req: Request, res: Response) {
     const { username, password, name } = req.body;
 
-    const resData: ApiResponseType = await UserModel.addNewUser({
+    const resData: ApiResponseData = await UserModel.addNewUser({
         username: username,
         password: password,
         name: name,
@@ -125,7 +125,7 @@ async function signup(req: Request, res: Response) {
  * Validates the API Token in the current request.
  */
 function validateApiToken(req: Request, res: Response) {
-    let resData: ApiResponseType;
+    let resData: ApiResponseData;
 
     if (req.apiTokenPayload) {
         resData = {

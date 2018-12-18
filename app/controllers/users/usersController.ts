@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { UserModel, User } from '@/models/user';
-import { ApiResponseType } from '@/controllers/apiController';
+import { ApiResponseData } from '@/controllers/apiController';
 import authMiddlewares from '@/middlewares/authMiddlewares';
 
 export const usersController: Router = Router();
@@ -15,7 +15,7 @@ usersController
  * Retrieves a list of users
  */
 function getAllUsers(req: Request, res: Response) {
-    let resData: ApiResponseType;
+    let resData: ApiResponseData;
 
     UserModel.find()
         .select('username name role')
@@ -48,7 +48,7 @@ function getAllUsers(req: Request, res: Response) {
 async function addNewUser(req: Request, res: Response) {
     const { username, password, name } = req.body;
 
-    const resData: ApiResponseType = await UserModel.addNewUser({
+    const resData: ApiResponseData = await UserModel.addNewUser({
         username: username,
         password: password,
         name: name,

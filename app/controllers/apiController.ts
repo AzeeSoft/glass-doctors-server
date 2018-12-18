@@ -6,7 +6,7 @@ import serverConfig from '@/tools/serverConfig';
 import { ApiTokenPayload } from '../tools/types/auth/index';
 import authMiddlewares from '@/middlewares/authMiddlewares';
 
-export type ApiResponseType = {
+export type ApiResponseData = {
     success: boolean;
     message: string;
     errorReport?: object;
