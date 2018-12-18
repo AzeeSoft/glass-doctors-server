@@ -2,9 +2,10 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { usersController } from './users/usersController';
 import { authController } from './auth/authController';
 import jwt from 'jsonwebtoken';
-import serverConfig from '@/tools/serverConfig';
+import serverConfig, { ServerMode } from '@/tools/serverConfig';
 import { ApiTokenPayload } from '../tools/types/auth/index';
 import authMiddlewares from '@/middlewares/authMiddlewares';
+import devTools from '@/tools/devTools';
 
 export type ApiResponseData = {
     success: boolean;
@@ -27,6 +28,8 @@ function extractApiToken(req: Request, res: Response, next: NextFunction) {
 
     let apiToken;
 
+    devTools.log();
+
     // Try to extract apiToken from the http authorization header
     const authHeader = req.headers.authorization;
     if (authHeader) {
@@ -35,23 +38,23 @@ function extractApiToken(req: Request, res: Response, next: NextFunction) {
         if (authHeaderWords.length >= 2) {
             apiToken = authHeaderWords[1];
 
-            console.log('Found api token in auth header');
+            devTools.log('Found api token in auth header');
         }
     }
 
     // Try to extract apiToken from the session
     if (!apiToken) {
-        console.log('\nCannot find api token in auth header! Checking session instead...');
+        devTools.log('Cannot find api token in auth header! Checking session instead...');
 
         if (req.session && req.session.apiToken) {
             apiToken = req.session.apiToken;
-            console.log('Found api token in session');
+            devTools.log('Found api token in session');
         } else {
-            console.log('Cannot find api token in session!');
+            devTools.log('Cannot find api token in session!');
         }
-
-        console.log();
     }
+
+    devTools.log();
 
     if (apiToken) {
         jwt.verify(
@@ -62,6 +65,9 @@ function extractApiToken(req: Request, res: Response, next: NextFunction) {
                 if (err) {
                     console.log(`Error during ApiToken Verification: ${err.stack}`);
                 } else {
+                    devTools.log(
+                        `Decoded API Token Payload: ${JSON.stringify(decodedPayload, null, 4)}\n`
+                    );
                     req.apiTokenPayload = decodedPayload as ApiTokenPayload;
                 }
                 next();

@@ -47,7 +47,7 @@ export class User extends Typegoose {
     static addAdminIfMissing(this: ModelType<User> & User) {
         this.findOne({ role: UserRole.ADMIN }, (err, user) => {
             if (err) {
-                console.log('Error retrieving admin user!');
+                console.log('Error retrieving admin user!\n');
             } else {
                 if (!user) {
                     console.log('Admin user is missing...');
@@ -62,9 +62,9 @@ export class User extends Typegoose {
 
                     adminUserModel.save(err => {
                         if (err) {
-                            console.log('Error creating admin user!');
+                            console.log('Error creating admin user!\n');
                         } else {
-                            console.log('Admin user created successfully!');
+                            console.log('Admin user created successfully!\n');
                         }
                     });
                 }
@@ -98,8 +98,6 @@ export class User extends Typegoose {
                         message: `Error creating the user!`,
                         errorReport: err,
                     };
-
-                    console.log(`${resData.message}: ${err.message}`);
                 } else {
                     resData = {
                         success: true,

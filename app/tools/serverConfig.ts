@@ -6,12 +6,17 @@ export enum ServerMode {
 
 export default {
     mode: process.env.MODE as ServerMode,
+    get isDev() {
+        return this.mode === ServerMode.dev;
+    },
+
     http: {
         port: +process.env.HTTP_PORT!,
         cors: {
             origin: process.env.CROSS_ORIGIN_DOMAINS!.split(' '),
         },
     },
+
     mongo: {
         host: process.env.MONGO_HOST,
         port: +process.env.MONGO_PORT!,
@@ -27,6 +32,7 @@ export default {
             saltingRounds: 10,
         },
     },
+
     auth: {
         session: {
             secret: process.env.SESSION_SECRET!,

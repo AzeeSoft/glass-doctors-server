@@ -16,6 +16,8 @@ import { apiController } from '@/controllers/apiController';
 import session from 'express-session';
 
 import connectMongoDbSession from 'connect-mongodb-session';
+import devTools from './tools/devTools';
+import debugMiddlewares from './middlewares/debugMiddlewares';
 const MongoDBStore = connectMongoDbSession(session);
 
 class Server {
@@ -27,9 +29,13 @@ class Server {
 
     public init() {
         console.log('Initializing Server...');
-        if (serverConfig.mode === ServerMode.dev) {
-            console.log(`Server Config: ${JSON.stringify(serverConfig, null, 4)}`);
+
+        // Although not needed, adding this if condition just to make it clear
+        if (serverConfig.isDev) {
+            devTools.log(`Running in Development Mode...\n`);
+            devTools.log(`Server Config: ${JSON.stringify(serverConfig, null, 4)}`);
         }
+
         console.log();
 
         this.initExpressServer();
@@ -37,8 +43,14 @@ class Server {
     }
 
     private initExpressServer() {
-        if (serverConfig.mode === ServerMode.dev) {
-            this.app.use(morgan('combined'));
+        if (serverConfig.isDev) {
+            this.app.use(debugMiddlewares.logRequestStart);
+
+            this.app.use(
+                morgan('combined', {
+                    immediate: true,
+                })
+            );
         }
 
         this.app.use(bodyParser.json());
@@ -103,7 +115,7 @@ class Server {
 
         this.db = mongoose.connection;
         this.db.once('open', () => {
-            console.log('Connected to the database successfully!');
+            console.log('Connected to the database successfully!\n');
 
             UserModel.addAdminIfMissing();
         });

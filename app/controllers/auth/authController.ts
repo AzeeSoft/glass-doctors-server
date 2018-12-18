@@ -66,6 +66,7 @@ function login(req: Request, res: Response) {
                             } else {
                                 const payload: ApiTokenPayload = {
                                     userData: {
+                                        id: user.id,
                                         username: user.username,
                                         role: user.role,
                                     },
