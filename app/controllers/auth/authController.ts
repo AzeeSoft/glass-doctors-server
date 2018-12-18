@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import serverConfig from '@/tools/serverConfig';
 import { ApiTokenPayload } from '../../tools/types/auth/index';
+import session from 'express-session';
 
 export const authController = Router();
 
@@ -17,7 +18,7 @@ authController.post('/signup', signup);
 function login(req: Request, res: Response) {
     let resData: ApiResponseType;
 
-    const { username, password } = req.body;
+    const { username, password, storeApiTokenInSession } = req.body;
 
     if (!username || !password) {
         resData = {
@@ -71,15 +72,30 @@ function login(req: Request, res: Response) {
                                 };
                                 const apiToken = jwt.sign(
                                     payload,
-                                    serverConfig.auth.jwt.secret!,
+                                    serverConfig.auth.jwt.secret,
                                     serverConfig.auth.jwt.options
                                 );
 
                                 resData = {
                                     success: true,
                                     message: `Login Successful`,
-                                    apiToken: apiToken,
                                 };
+
+                                if (storeApiTokenInSession) {
+                                    if (req.session) {
+                                        req.session.apiToken = apiToken;
+                                    } else {
+                                        resData = {
+                                            success: false,
+                                            message: `Error storing api token`,
+                                        };
+                                    }
+                                } else {
+                                    if (req.session) {
+                                        req.session.apiToken = undefined;
+                                    }
+                                    resData.apiToken = apiToken;
+                                }
                             }
                         }
 

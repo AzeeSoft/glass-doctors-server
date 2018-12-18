@@ -13,6 +13,10 @@ import mongoose from 'mongoose';
 import serverConfig, { ServerMode } from '@/tools/serverConfig';
 import { UserModel } from '@/models/user';
 import { apiController } from '@/controllers/apiController';
+import session from 'express-session';
+
+import connectMongoDbSession from 'connect-mongodb-session';
+const MongoDBStore = connectMongoDbSession(session);
 
 class Server {
     readonly app: express.Application = express();
@@ -40,6 +44,35 @@ class Server {
         this.app.use(bodyParser.json());
         this.app.use(cors());
 
+        const sessionStore = new MongoDBStore(
+            {
+                uri: serverConfig.mongo.uri,
+                collection: serverConfig.mongo.sessionCollection,
+            },
+            err => {
+                if (err) {
+                    console.error('Cannot initialize Session Store:');
+                    console.error(JSON.stringify(err, null, 4));
+                }
+            }
+        );
+
+        sessionStore.on('error', err => {
+            if (err) {
+                console.error('Error in Session Store:');
+                console.error(JSON.stringify(err, null, 4));
+            }
+        });
+
+        this.app.use(
+            session({
+                secret: serverConfig.auth.session.secret,
+                store: sessionStore,
+                resave: true,
+                saveUninitialized: true,
+            })
+        );
+
         this.app.use('/', apiController);
 
         this.app.listen(serverConfig.http.port, () => {
@@ -51,9 +84,7 @@ class Server {
         console.log('Initializing connection to database...\n');
 
         mongoose.connect(
-            `mongodb://${serverConfig.mongo.host}:${serverConfig.mongo.port}/${
-                serverConfig.mongo.db
-            }`,
+            serverConfig.mongo.uri,
             {
                 useNewUrlParser: true,
             },

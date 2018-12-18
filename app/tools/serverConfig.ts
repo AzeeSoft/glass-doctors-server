@@ -13,6 +13,11 @@ export default {
         host: process.env.MONGO_HOST,
         port: +process.env.MONGO_PORT!,
         db: process.env.MONGO_DB,
+        sessionCollection: process.env.MONGO_SESSION_COLLECTION!,
+
+        get uri(): string {
+            return `mongodb://${this.host}:${this.port}/${this.db}`;
+        },
 
         defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD,
         passwordHash: {
@@ -20,8 +25,11 @@ export default {
         },
     },
     auth: {
+        session: {
+            secret: process.env.SESSION_SECRET!,
+        },
         jwt: {
-            secret: process.env.JWT_SECRET,
+            secret: process.env.JWT_SECRET!,
             options: {
                 expiresIn: '1d',
                 issuer: 'GlassDoctors',
