@@ -26,7 +26,7 @@ function login(req: Request, res: Response) {
             message: `${!username ? 'Username' : 'Password'} is required!`,
         };
 
-        res.send(resData);
+        res.json(resData);
         return;
     }
 
@@ -40,7 +40,7 @@ function login(req: Request, res: Response) {
                     errorReport: err,
                 };
 
-                res.send(resData);
+                res.json(resData);
             } else {
                 if (!user) {
                     resData = {
@@ -48,7 +48,7 @@ function login(req: Request, res: Response) {
                         message: `Invalid Username`,
                     };
 
-                    res.send(resData);
+                    res.json(resData);
                 } else {
                     bcrypt.compare(password, user.password, (err, same) => {
                         if (err) {
@@ -100,7 +100,7 @@ function login(req: Request, res: Response) {
                             }
                         }
 
-                        res.send(resData);
+                        res.json(resData);
                     });
                 }
             }
@@ -119,7 +119,7 @@ async function signup(req: Request, res: Response) {
         name: name,
     } as User);
 
-    res.send(resData);
+    res.json(resData);
 }
 
 /**
@@ -140,5 +140,5 @@ function validateApiToken(req: Request, res: Response) {
         };
     }
 
-    res.send(resData);
+    res.json(resData);
 }

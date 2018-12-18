@@ -37,7 +37,7 @@ function getAllUsers(req: Request, res: Response) {
                 };
             }
 
-            res.send(resData);
+            res.json(resData);
         });
 }
 
@@ -54,5 +54,5 @@ async function addNewUser(req: Request, res: Response) {
         name: name,
     } as User);
 
-    res.send(resData);
+    res.json(resData);
 }

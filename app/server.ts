@@ -16,8 +16,9 @@ import { apiController } from '@/controllers/apiController';
 import session from 'express-session';
 
 import connectMongoDbSession from 'connect-mongodb-session';
-import devTools from './tools/devTools';
+import { devUtils } from './tools/utils/devUtils';
 import debugMiddlewares from './middlewares/debugMiddlewares';
+import { StringDecoration, helperUtils } from './tools/utils/helperUtils';
 const MongoDBStore = connectMongoDbSession(session);
 
 class Server {
@@ -28,31 +29,24 @@ class Server {
     public constructor() {}
 
     public init() {
-        console.log('Initializing Server...');
+        helperUtils.log();
+        helperUtils.log('Initializing Server...');
 
         // Although not needed, adding this if condition just to make it clear
         if (serverConfig.isDev) {
-            devTools.log(`Running in Development Mode...\n`);
-            devTools.log(`Server Config: ${JSON.stringify(serverConfig, null, 4)}`);
+            devUtils.log(`Running in Development Mode...`);
+            devUtils.log();
+            devUtils.log('Server Config:', StringDecoration.UNDERLINE);
+            devUtils.log(`${JSON.stringify(serverConfig, null, 4)}`);
         }
 
-        console.log();
+        helperUtils.log();
 
         this.initExpressServer();
         this.initDatabaseConnection();
     }
 
     private initExpressServer() {
-        if (serverConfig.isDev) {
-            this.app.use(debugMiddlewares.logRequestStart);
-
-            this.app.use(
-                morgan('combined', {
-                    immediate: true,
-                })
-            );
-        }
-
         this.app.use(bodyParser.json());
         this.app.use(
             cors({
@@ -61,6 +55,17 @@ class Server {
             })
         );
 
+        if (serverConfig.isDev) {
+            this.app.use(debugMiddlewares.logRequestStart);
+            this.app.use(debugMiddlewares.logRequestEnd);
+
+            this.app.use(
+                morgan('combined', {
+                    immediate: true,
+                })
+            );
+        }
+
         const sessionStore = new MongoDBStore(
             {
                 uri: serverConfig.mongo.uri,
@@ -68,16 +73,16 @@ class Server {
             },
             err => {
                 if (err) {
-                    console.error('Cannot initialize Session Store:');
-                    console.error(JSON.stringify(err, null, 4));
+                    helperUtils.error('Cannot initialize Session Store:', StringDecoration.ERROR);
+                    helperUtils.error(JSON.stringify(err, null, 4), StringDecoration.ERROR);
                 }
             }
         );
 
         sessionStore.on('error', err => {
             if (err) {
-                console.error('Error in Session Store:');
-                console.error(JSON.stringify(err, null, 4));
+                helperUtils.error('Error in Session Store:', StringDecoration.ERROR);
+                helperUtils.error(JSON.stringify(err, null, 4), StringDecoration.ERROR);
             }
         });
 
@@ -93,12 +98,19 @@ class Server {
         this.app.use('/', apiController);
 
         this.app.listen(serverConfig.http.port, () => {
-            console.log(`Listening at http://localhost:${serverConfig.http.port}/`);
+            helperUtils.log(
+                `Listening at ${helperUtils.decorate(
+                    `http://localhost:${serverConfig.http.port}/`,
+                    StringDecoration.HIGHLIGHT,
+                    StringDecoration.UNDERLINE
+                )}`,
+                StringDecoration.SUCCESS
+            );
         });
     }
 
     private initDatabaseConnection() {
-        console.log('Initializing connection to database...\n');
+        helperUtils.log('Initializing connection to database...\n');
 
         mongoose.connect(
             serverConfig.mongo.uri,
@@ -107,15 +119,18 @@ class Server {
             },
             err => {
                 if (err) {
-                    console.error('Error: Cannot connect to the database...');
-                    console.error(err.stack);
+                    helperUtils.error(
+                        'Error: Cannot connect to the database...',
+                        StringDecoration.ERROR
+                    );
+                    helperUtils.error(err.stack, StringDecoration.ERROR);
                 }
             }
         );
 
         this.db = mongoose.connection;
         this.db.once('open', () => {
-            console.log('Connected to the database successfully!\n');
+            helperUtils.log('Connected to the database successfully!\n', StringDecoration.SUCCESS);
 
             UserModel.addAdminIfMissing();
         });

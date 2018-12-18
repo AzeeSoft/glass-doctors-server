@@ -12,7 +12,7 @@ const authMiddlewares = {
                 message: 'Authorization error. Token Required.',
             };
 
-            res.send(resData);
+            res.json(resData);
         }
     },
     allowOnlyAdmin(req: Request, res: Response, next: NextFunction) {
@@ -24,7 +24,7 @@ const authMiddlewares = {
                 message: 'Authorization error. Insufficient permissions.',
             };
 
-            res.send(resData);
+            res.json(resData);
         }
     },
 };

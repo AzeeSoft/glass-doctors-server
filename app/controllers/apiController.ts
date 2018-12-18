@@ -5,7 +5,8 @@ import jwt from 'jsonwebtoken';
 import serverConfig, { ServerMode } from '@/tools/serverConfig';
 import { ApiTokenPayload } from '../tools/types/auth/index';
 import authMiddlewares from '@/middlewares/authMiddlewares';
-import devTools from '@/tools/devTools';
+import { devUtils } from '@/tools/utils/devUtils';
+import { helperUtils, StringDecoration } from '@/tools/utils/helperUtils';
 
 export type ApiResponseData = {
     success: boolean;
@@ -28,7 +29,7 @@ function extractApiToken(req: Request, res: Response, next: NextFunction) {
 
     let apiToken;
 
-    devTools.log();
+    devUtils.log();
 
     // Try to extract apiToken from the http authorization header
     const authHeader = req.headers.authorization;
@@ -38,23 +39,23 @@ function extractApiToken(req: Request, res: Response, next: NextFunction) {
         if (authHeaderWords.length >= 2) {
             apiToken = authHeaderWords[1];
 
-            devTools.log('Found api token in auth header');
+            devUtils.log('Found api token in auth header');
         }
     }
 
     // Try to extract apiToken from the session
     if (!apiToken) {
-        devTools.log('Cannot find api token in auth header! Checking session instead...');
+        devUtils.log('Cannot find api token in auth header! Checking session instead...');
 
         if (req.session && req.session.apiToken) {
             apiToken = req.session.apiToken;
-            devTools.log('Found api token in session');
+            devUtils.log('Found api token in session');
         } else {
-            devTools.log('Cannot find api token in session!');
+            devUtils.log('Cannot find api token in session!');
         }
     }
 
-    devTools.log();
+    devUtils.log();
 
     if (apiToken) {
         jwt.verify(
@@ -65,9 +66,8 @@ function extractApiToken(req: Request, res: Response, next: NextFunction) {
                 if (err) {
                     console.log(`Error during ApiToken Verification: ${err.stack}`);
                 } else {
-                    devTools.log(
-                        `Decoded API Token Payload: ${JSON.stringify(decodedPayload, null, 4)}\n`
-                    );
+                    devUtils.log('Decoded API Token Payload:', StringDecoration.UNDERLINE);
+                    devUtils.log(`${JSON.stringify(decodedPayload, null, 4)}\n`);
                     req.apiTokenPayload = decodedPayload as ApiTokenPayload;
                 }
                 next();
