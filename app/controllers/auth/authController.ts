@@ -11,6 +11,7 @@ export const authController = Router();
 authController.post('/login', login);
 authController.post('/signup', signup);
 authController.post('/validateAPIToken', validateApiToken);
+authController.post('/logoutSession', logoutSession);
 
 /**
  * Validates user credentials, and sends back a JWT (JSON Web Token).
@@ -139,6 +140,22 @@ function validateApiToken(req: Request, res: Response) {
             message: 'Your API Token is invalid',
         };
     }
+
+    res.json(resData);
+}
+
+/**
+ * Removes the API Token, if it exists, from the session.
+ */
+function logoutSession(req: Request, res: Response) {
+    if (req.session) {
+        req.session.apiToken = undefined;
+    }
+
+    const resData: ApiResponseData = {
+        success: true,
+        message: 'Successfully logged out from the session',
+    };
 
     res.json(resData);
 }
